@@ -8,12 +8,23 @@ def index(request):
 def show_catalog(request):
     template = 'catalog.html'
 
-    # Получаем все телефоны из базы данных
+    # Получаем параметр сортировки из GET-запроса, если он указан
+    sort = request.GET.get('sort')
+
+    # Получаем все телефоны
     phones = Phone.objects.all()
 
-    # Добавляем их в контекст для передачи в шаблон
+    # Применяем сортировку в зависимости от параметра sort
+    if sort == 'name':
+        phones = phones.order_by('name')  # Сортировка по имени в алфавитном порядке
+    elif sort == 'min_price':
+        phones = phones.order_by('price')  # Сортировка по цене по возрастанию
+    elif sort == 'max_price':
+        phones = phones.order_by('-price')  # Сортировка по цене по убыванию
+
+    # Передаём отсортированные телефоны в контекст
     context = {
-        'phones': phones
+        'phones': phones,
     }
 
     return render(request, template, context)
@@ -25,7 +36,6 @@ def show_product(request, slug):
     # Получаем телефон по slug
     phone = Phone.objects.get(slug=slug)
 
-    # Передаём телефон в шаблон через контекст
     context = {
         'phone': phone
     }
